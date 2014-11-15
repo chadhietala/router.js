@@ -1,4 +1,5 @@
-import { module, flushBackburner, transitionTo, transitionToWithAbort, shouldNotHappen, shouldBeTransition } from "tests/test_helpers";
+/*globals asyncTest, throws*/
+import { module, flushBackburner, transitionTo, transitionToWithAbort, shouldNotHappen, shouldBeTransition } from "./test_helpers";
 import Router from "router";
 import { resolve, configure, reject, Promise } from "rsvp";
 
@@ -1151,7 +1152,7 @@ test("params are known by a transition up front", function() {
     }
   };
 
-  transitionTo(router, '/posts/filter/sad', 'blorg')
+  transitionTo(router, '/posts/filter/sad', 'blorg');
 });
 
 test("transitionTo uses the current context if you are already in a handler with a context that is not changing", function() {

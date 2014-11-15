@@ -1,4 +1,4 @@
-import { module, flushBackburner, transitionTo, transitionToWithAbort, shouldNotHappen, shouldBeTransition } from "tests/test_helpers";
+import { module, flushBackburner, transitionTo, transitionToWithAbort, shouldNotHappen, shouldBeTransition } from "./test_helpers";
 import Router from "router";
 import { resolve, configure, reject, Promise } from "rsvp";
 

@@ -1,4 +1,4 @@
-import { Backburner } from "backburner";
+import Backburner from "backburner";
 import { resolve, configure, reject, Promise } from "rsvp";
 
 var slice = Array.prototype.slice;
@@ -34,7 +34,7 @@ function module(name, options) {
       }
     }
   });
-};
+}
 
 
 // Helper method that performs a transition and flushes

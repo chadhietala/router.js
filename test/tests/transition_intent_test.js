@@ -1,4 +1,4 @@
-import { module } from "tests/test_helpers";
+import { module } from "./test_helpers";
 import TransitionIntent from 'router/transition-intent';
 import URLTransitionIntent from 'router/transition-intent/url-transition-intent';
 import NamedTransitionIntent from 'router/transition-intent/named-transition-intent';

@@ -1,4 +1,4 @@
-import { module } from "tests/test_helpers";
+import { module } from "./test_helpers";
 import Router from "router";
 import { HandlerInfo, ResolvedHandlerInfo, UnresolvedHandlerInfoByObject, UnresolvedHandlerInfoByParam } from 'router/handler-info';
 import { Backburner } from "backburner";
