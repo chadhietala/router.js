@@ -1,12 +1,7 @@
 "use strict";
-var TransitionIntent = require("../transition-intent")["default"];
-var TransitionState = require("../transition-state")["default"];
-var handlerInfoFactory = require("../handler-info/factory")["default"];
-var oCreate = require("../utils").oCreate;
-var merge = require("../utils").merge;
-var subclass = require("../utils").subclass;
+var router$transition$intent$$ = require("../transition-intent"), router$transition$state$$ = require("../transition-state"), router$handler$info$factory$$ = require("../handler-info/factory"), router$utils$$ = require("../utils");
 
-exports["default"] = subclass(TransitionIntent, {
+exports["default"] = router$utils$$.subclass(router$transition$intent$$.default, {
   url: null,
 
   initialize: function(props) {
@@ -14,7 +9,7 @@ exports["default"] = subclass(TransitionIntent, {
   },
 
   applyToState: function(oldState, recognizer, getHandler) {
-    var newState = new TransitionState();
+    var newState = new router$transition$state$$.default();
 
     var results = recognizer.recognize(this.url),
         queryParams = {},
@@ -35,7 +30,7 @@ exports["default"] = subclass(TransitionIntent, {
         throw new UnrecognizedURLError(this.url);
       }
 
-      var newHandlerInfo = handlerInfoFactory('param', {
+      var newHandlerInfo = router$handler$info$factory$$.default('param', {
         name: name,
         handler: handler,
         params: result.params
@@ -50,7 +45,7 @@ exports["default"] = subclass(TransitionIntent, {
       }
     }
 
-    merge(newState.queryParams, results.queryParams);
+    router$utils$$.merge(newState.queryParams, results.queryParams);
 
     return newState;
   }
@@ -64,3 +59,5 @@ function UnrecognizedURLError(message) {
   this.message = (message || "UnrecognizedURLError");
   this.name = "UnrecognizedURLError";
 }
+
+//# sourceMappingURL=url-transition-intent.js.map

@@ -1,5 +1,5 @@
 "use strict";
-var merge = require("./utils").merge;
+var router$utils$$ = require("./utils");
 
 function TransitionIntent(props) {
   this.initialize(props);
@@ -14,3 +14,5 @@ TransitionIntent.prototype = {
 };
 
 exports["default"] = TransitionIntent;
+
+//# sourceMappingURL=transition-intent.js.map

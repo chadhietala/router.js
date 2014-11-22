@@ -11,7 +11,10 @@
   },
   "devDependencies": {
     "broccoli-compile-modules": "^1.1.0",
-    "broccoli-funnel": "^0.1.6"
+    "broccoli-concat": "0.0.12",
+    "broccoli-funnel": "^0.1.6",
+    "broccoli-jshint": "^0.5.3",
+    "broccoli-merge-trees": "^0.2.1"
   },
   "scripts": {
     "test": "grunt test",

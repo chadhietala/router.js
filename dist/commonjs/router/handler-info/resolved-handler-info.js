@@ -1,16 +1,13 @@
 "use strict";
-var HandlerInfo = require("../handler-info")["default"];
-var subclass = require("router/utils").subclass;
-var promiseLabel = require("router/utils").promiseLabel;
-var Promise = require("rsvp/promise")["default"];
+var router$handler$info$$ = require("../handler-info"), router$utils$$ = require("router/utils"), router$config$$ = require("../config");
 
-var ResolvedHandlerInfo = subclass(HandlerInfo, {
+var ResolvedHandlerInfo = router$utils$$.subclass(router$handler$info$$.default, {
   resolve: function(shouldContinue, payload) {
     // A ResolvedHandlerInfo just resolved with itself.
     if (payload && payload.resolvedModels) {
       payload.resolvedModels[this.name] = this.context;
     }
-    return Promise.resolve(this, this.promiseLabel("Resolve"));
+    return router$config$$.default.Promise.resolve(this, this.promiseLabel("Resolve"));
   },
 
   getUnresolved: function() {
@@ -25,3 +22,5 @@ var ResolvedHandlerInfo = subclass(HandlerInfo, {
 });
 
 exports["default"] = ResolvedHandlerInfo;
+
+//# sourceMappingURL=resolved-handler-info.js.map

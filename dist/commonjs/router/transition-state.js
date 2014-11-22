@@ -1,9 +1,5 @@
 "use strict";
-var ResolvedHandlerInfo = require("./handler-info").ResolvedHandlerInfo;
-var forEach = require("./utils").forEach;
-var promiseLabel = require("./utils").promiseLabel;
-var callHook = require("./utils").callHook;
-var Promise = require("rsvp/promise")["default"];
+var router$handler$info$$ = require("./handler-info"), router$utils$$ = require("./utils"), router$config$$ = require("./config");
 
 function TransitionState(other) {
   this.handlerInfos = [];
@@ -18,13 +14,13 @@ TransitionState.prototype = {
 
   promiseLabel: function(label) {
     var targetName = '';
-    forEach(this.handlerInfos, function(handlerInfo) {
+    router$utils$$.forEach(this.handlerInfos, function(handlerInfo) {
       if (targetName !== '') {
         targetName += '.';
       }
       targetName += handlerInfo.name;
     });
-    return promiseLabel("'" + targetName + "': " + label);
+    return router$utils$$.promiseLabel("'" + targetName + "': " + label);
   },
 
   resolve: function(shouldContinue, payload) {
@@ -32,7 +28,7 @@ TransitionState.prototype = {
     // First, calculate params for this state. This is useful
     // information to provide to the various route hooks.
     var params = this.params;
-    forEach(this.handlerInfos, function(handlerInfo) {
+    router$utils$$.forEach(this.handlerInfos, function(handlerInfo) {
       params[handlerInfo.name] = handlerInfo.params || {};
     });
 
@@ -43,11 +39,11 @@ TransitionState.prototype = {
     var wasAborted = false;
 
     // The prelude RSVP.resolve() asyncs us into the promise land.
-    return Promise.resolve(null, this.promiseLabel("Start transition"))
+    return router$config$$.default.Promise.resolve(null, this.promiseLabel("Start transition"))
     .then(resolveOneHandlerInfo, null, this.promiseLabel('Resolve handler'))['catch'](handleError, this.promiseLabel('Handle error'));
 
     function innerShouldContinue() {
-      return Promise.resolve(shouldContinue(), currentState.promiseLabel("Check if should continue"))['catch'](function(reason) {
+      return router$config$$.default.Promise.resolve(shouldContinue(), currentState.promiseLabel("Check if should continue"))['catch'](function(reason) {
         // We distinguish between errors that occurred
         // during resolution (e.g. beforeModel/model/afterModel),
         // and aborts due to a rejecting promise from shouldContinue().
@@ -62,7 +58,7 @@ TransitionState.prototype = {
       var handlerInfos = currentState.handlerInfos;
       var errorHandlerIndex = payload.resolveIndex >= handlerInfos.length ?
                               handlerInfos.length - 1 : payload.resolveIndex;
-      return Promise.reject({
+      return router$config$$.default.Promise.reject({
         error: error,
         handlerWithError: currentState.handlerInfos[errorHandlerIndex].handler,
         wasAborted: wasAborted,
@@ -83,7 +79,7 @@ TransitionState.prototype = {
         // routes don't re-run the model hooks for this
         // already-resolved route.
         var handler = resolvedHandlerInfo.handler;
-        callHook(handler, 'redirect', resolvedHandlerInfo.context, payload);
+        router$utils$$.callHook(handler, 'redirect', resolvedHandlerInfo.context, payload);
       }
 
       // Proceed after ensuring that the redirect hook
@@ -110,3 +106,5 @@ TransitionState.prototype = {
 };
 
 exports["default"] = TransitionState;
+
+//# sourceMappingURL=transition-state.js.map

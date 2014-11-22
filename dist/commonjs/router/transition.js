@@ -1,10 +1,5 @@
 "use strict";
-var Promise = require("rsvp/promise")["default"];
-var ResolvedHandlerInfo = require("./handler-info").ResolvedHandlerInfo;
-var trigger = require("./utils").trigger;
-var slice = require("./utils").slice;
-var log = require("./utils").log;
-var promiseLabel = require("./utils").promiseLabel;
+var router$config$$ = require("./config"), router$handler$info$$ = require("./handler-info"), router$utils$$ = require("./utils");
 
 /**
   @private
@@ -25,7 +20,7 @@ function Transition(router, intent, state, error) {
   this.queryParams = {};
 
   if (error) {
-    this.promise = Promise.reject(error);
+    this.promise = router$config$$.default.Promise.reject(error);
     return;
   }
 
@@ -50,21 +45,21 @@ function Transition(router, intent, state, error) {
     this.sequence = Transition.currentSequence++;
     this.promise = state.resolve(checkForAbort, this)['catch'](function(result) {
       if (result.wasAborted || transition.isAborted) {
-        return Promise.reject(logAbort(transition));
+        return router$config$$.default.Promise.reject(logAbort(transition));
       } else {
         transition.trigger('error', result.error, transition, result.handlerWithError);
         transition.abort();
-        return Promise.reject(result.error);
+        return router$config$$.default.Promise.reject(result.error);
       }
-    }, promiseLabel('Handle Abort'));
+    }, router$utils$$.promiseLabel('Handle Abort'));
   } else {
-    this.promise = Promise.resolve(this.state);
+    this.promise = router$config$$.default.Promise.resolve(this.state);
     this.params = {};
   }
 
   function checkForAbort() {
     if (transition.isAborted) {
-      return Promise.reject(undefined, promiseLabel("Transition aborted - reject"));
+      return router$config$$.default.Promise.reject(undefined, router$utils$$.promiseLabel("Transition aborted - reject"));
     }
   }
 }
@@ -153,8 +148,8 @@ Transition.prototype = {
     Useful for tooling.
     @return {Promise}
    */
-  "catch": function(onRejection, label) {
-    return this.promise["catch"](onRejection, label);
+  catch: function(onRejection, label) {
+    return this.promise.catch(onRejection, label);
   },
 
   /**
@@ -170,8 +165,8 @@ Transition.prototype = {
     Useful for tooling.
     @return {Promise}
    */
-  "finally": function(callback, label) {
-    return this.promise["finally"](callback, label);
+  finally: function(callback, label) {
+    return this.promise.finally(callback, label);
   },
 
   /**
@@ -182,7 +177,7 @@ Transition.prototype = {
    */
   abort: function() {
     if (this.isAborted) { return this; }
-    log(this.router, this.sequence, this.targetName + ": transition was aborted");
+    router$utils$$.log(this.router, this.sequence, this.targetName + ": transition was aborted");
     this.intent.preTransitionState = this.router.state;
     this.isAborted = true;
     this.isActive = false;
@@ -240,14 +235,14 @@ Transition.prototype = {
     @param {String} name the name of the event to fire
    */
   trigger: function (ignoreFailure) {
-    var args = slice.call(arguments);
+    var args = router$utils$$.slice.call(arguments);
     if (typeof ignoreFailure === 'boolean') {
       args.shift();
     } else {
       // Throw errors on unhandled trigger events by default
       ignoreFailure = false;
     }
-    trigger(this.router, this.state.handlerInfos.slice(0, this.resolveIndex + 1), ignoreFailure, args);
+    router$utils$$.trigger(this.router, this.state.handlerInfos.slice(0, this.resolveIndex + 1), ignoreFailure, args);
   },
 
   /**
@@ -268,7 +263,7 @@ Transition.prototype = {
       if (router.activeTransition) {
         return router.activeTransition.followRedirects();
       }
-      return Promise.reject(reason);
+      return router$config$$.default.Promise.reject(reason);
     });
   },
 
@@ -280,7 +275,7 @@ Transition.prototype = {
     @private
    */
   log: function(message) {
-    log(this.router, this.sequence, message);
+    router$utils$$.log(this.router, this.sequence, message);
   }
 };
 
@@ -293,7 +288,7 @@ Transition.prototype.send = Transition.prototype.trigger;
   Logs and returns a TransitionAborted error.
  */
 function logAbort(transition) {
-  log(transition.router, transition.sequence, "detected abort.");
+  router$utils$$.log(transition.router, transition.sequence, "detected abort.");
   return new TransitionAborted();
 }
 
@@ -302,6 +297,6 @@ function TransitionAborted(message) {
   this.name = "TransitionAborted";
 }
 
-exports.Transition = Transition;
-exports.logAbort = logAbort;
-exports.TransitionAborted = TransitionAborted;
+exports.Transition = Transition, exports.logAbort = logAbort, exports.TransitionAborted = TransitionAborted;
+
+//# sourceMappingURL=transition.js.map

@@ -1,4 +1,5 @@
 "use strict";
+exports.extractQueryParams = extractQueryParams, exports.log = log, exports.bind = bind, exports.forEach = forEach, exports.trigger = trigger, exports.getChangelist = getChangelist, exports.promiseLabel = promiseLabel, exports.subclass = subclass;
 var slice = Array.prototype.slice;
 
 var _isArray;
@@ -11,7 +12,7 @@ if (!Array.isArray) {
 }
 
 var isArray = _isArray;
-exports.isArray = isArray;
+
 function merge(hash, other) {
   for (var prop in other) {
     if (other.hasOwnProperty(prop)) { hash[prop] = other[prop]; }
@@ -23,12 +24,7 @@ var oCreate = Object.create || function(proto) {
   F.prototype = proto;
   return new F();
 };
-exports.oCreate = oCreate;
-/**
-  @private
 
-  Extracts query params from the end of an array
-**/
 function extractQueryParams(array) {
   var len = (array && array.length), head, queryParams;
 
@@ -41,7 +37,7 @@ function extractQueryParams(array) {
   }
 }
 
-exports.extractQueryParams = extractQueryParams;/**
+/**
   @private
 
   Coerces query param properties and array elements into strings.
@@ -57,9 +53,6 @@ function coerceQueryParamsToString(queryParams) {
     }
   }
 }
-/**
-  @private
- */
 function log(router, sequence, msg) {
   if (!router.log) { return; }
 
@@ -71,7 +64,7 @@ function log(router, sequence, msg) {
   }
 }
 
-exports.log = log;function bind(context, fn) {
+function bind(context, fn) {
   var boundArgs = arguments;
   return function(value) {
     var args = slice.call(boundArgs, 2);
@@ -80,7 +73,7 @@ exports.log = log;function bind(context, fn) {
   };
 }
 
-exports.bind = bind;function isParam(object) {
+function isParam(object) {
   return (typeof object === "string" || object instanceof String || typeof object === "number" || object instanceof Number);
 }
 
@@ -89,7 +82,7 @@ function forEach(array, callback) {
   for (var i=0, l=array.length; i<l && false !== callback(array[i]); i++) { }
 }
 
-exports.forEach = forEach;function trigger(router, handlerInfos, ignoreFailure, args) {
+function trigger(router, handlerInfos, ignoreFailure, args) {
   if (router.triggerEvent) {
     router.triggerEvent(handlerInfos, ignoreFailure, args);
     return;
@@ -122,7 +115,7 @@ exports.forEach = forEach;function trigger(router, handlerInfos, ignoreFailure, 
   }
 }
 
-exports.trigger = trigger;function getChangelist(oldObject, newObject) {
+function getChangelist(oldObject, newObject) {
   var key;
   var results = {
     all: {},
@@ -174,11 +167,11 @@ exports.trigger = trigger;function getChangelist(oldObject, newObject) {
   return didChange && results;
 }
 
-exports.getChangelist = getChangelist;function promiseLabel(label) {
+function promiseLabel(label) {
   return 'Router: ' + label;
 }
 
-exports.promiseLabel = promiseLabel;function subclass(parentConstructor, proto) {
+function subclass(parentConstructor, proto) {
   function C(props) {
     parentConstructor.call(this, props || {});
   }
@@ -187,7 +180,7 @@ exports.promiseLabel = promiseLabel;function subclass(parentConstructor, proto) 
   return C;
 }
 
-exports.subclass = subclass;function resolveHook(obj, hookName) {
+function resolveHook(obj, hookName) {
   if (!obj) { return; }
   var underscored = "_" + hookName;
   return obj[underscored] && underscored ||
@@ -206,10 +199,6 @@ function applyHook(obj, _hookName, args) {
   }
 }
 
-exports.merge = merge;
-exports.slice = slice;
-exports.isParam = isParam;
-exports.coerceQueryParamsToString = coerceQueryParamsToString;
-exports.callHook = callHook;
-exports.resolveHook = resolveHook;
-exports.applyHook = applyHook;
+exports.isArray = isArray, exports.oCreate = oCreate, exports.merge = merge, exports.slice = slice, exports.isParam = isParam, exports.coerceQueryParamsToString = coerceQueryParamsToString, exports.callHook = callHook, exports.resolveHook = resolveHook, exports.applyHook = applyHook;
+
+//# sourceMappingURL=utils.js.map

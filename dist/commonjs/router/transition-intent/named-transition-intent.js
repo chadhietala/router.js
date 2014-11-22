@@ -1,13 +1,7 @@
 "use strict";
-var TransitionIntent = require("../transition-intent")["default"];
-var TransitionState = require("../transition-state")["default"];
-var handlerInfoFactory = require("../handler-info/factory")["default"];
-var isParam = require("../utils").isParam;
-var extractQueryParams = require("../utils").extractQueryParams;
-var merge = require("../utils").merge;
-var subclass = require("../utils").subclass;
+var router$transition$intent$$ = require("../transition-intent"), router$transition$state$$ = require("../transition-state"), router$handler$info$factory$$ = require("../handler-info/factory"), router$utils$$ = require("../utils");
 
-exports["default"] = subclass(TransitionIntent, {
+exports["default"] = router$utils$$.subclass(router$transition$intent$$.default, {
   name: null,
   pivotHandler: null,
   contexts: null,
@@ -22,7 +16,7 @@ exports["default"] = subclass(TransitionIntent, {
 
   applyToState: function(oldState, recognizer, getHandler, isIntermediate) {
 
-    var partitionedArgs     = extractQueryParams([this.name].concat(this.contexts)),
+    var partitionedArgs     = router$utils$$.extractQueryParams([this.name].concat(this.contexts)),
       pureArgs              = partitionedArgs[0],
       queryParams           = partitionedArgs[1],
       handlers              = recognizer.handlersFor(pureArgs[0]);
@@ -35,7 +29,7 @@ exports["default"] = subclass(TransitionIntent, {
   applyToHandlers: function(oldState, handlers, getHandler, targetRouteName, isIntermediate, checkingIfActive) {
 
     var i, len;
-    var newState = new TransitionState();
+    var newState = new router$transition$state$$.default();
     var objects = this.contexts.slice(0);
 
     var invalidateIndex = handlers.length;
@@ -110,7 +104,7 @@ exports["default"] = subclass(TransitionIntent, {
       this.invalidateChildren(newState.handlerInfos, invalidateIndex);
     }
 
-    merge(newState.queryParams, this.queryParams || {});
+    router$utils$$.merge(newState.queryParams, this.queryParams || {});
 
     return newState;
   },
@@ -130,7 +124,7 @@ exports["default"] = subclass(TransitionIntent, {
 
       // Use the objects provided for this transition.
       objectToUse = objects[objects.length - 1];
-      if (isParam(objectToUse)) {
+      if (router$utils$$.isParam(objectToUse)) {
         return this.createParamHandlerInfo(name, handler, names, objects, oldHandlerInfo);
       } else {
         objects.pop();
@@ -154,7 +148,7 @@ exports["default"] = subclass(TransitionIntent, {
       }
     }
 
-    return handlerInfoFactory('object', {
+    return router$handler$info$factory$$.default('object', {
       name: name,
       handler: handler,
       context: objectToUse,
@@ -174,7 +168,7 @@ exports["default"] = subclass(TransitionIntent, {
 
       var peek = objects[objects.length - 1];
       var paramName = names[numNames];
-      if (isParam(peek)) {
+      if (router$utils$$.isParam(peek)) {
         params[paramName] = "" + objects.pop();
       } else {
         // If we're here, this means only some of the params
@@ -188,10 +182,12 @@ exports["default"] = subclass(TransitionIntent, {
       }
     }
 
-    return handlerInfoFactory('param', {
+    return router$handler$info$factory$$.default('param', {
       name: name,
       handler: handler,
       params: params
     });
   }
 });
+
+//# sourceMappingURL=named-transition-intent.js.map

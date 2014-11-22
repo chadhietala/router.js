@@ -1,15 +1,10 @@
 "use strict";
-var HandlerInfo = require("../handler-info")["default"];
-var merge = require("router/utils").merge;
-var subclass = require("router/utils").subclass;
-var promiseLabel = require("router/utils").promiseLabel;
-var isParam = require("router/utils").isParam;
-var Promise = require("rsvp/promise")["default"];
+var router$handler$info$$ = require("../handler-info"), router$utils$$ = require("router/utils"), router$config$$ = require("../config");
 
-var UnresolvedHandlerInfoByObject = subclass(HandlerInfo, {
+var UnresolvedHandlerInfoByObject = router$utils$$.subclass(router$handler$info$$.default, {
   getModel: function(payload) {
     this.log(payload, this.name + ": resolving provided model");
-    return Promise.resolve(this.context);
+    return router$config$$.default.Promise.resolve(this.context);
   },
 
   initialize: function(props) {
@@ -32,7 +27,7 @@ var UnresolvedHandlerInfoByObject = subclass(HandlerInfo, {
         handler = this.handler;
 
     var object = {};
-    if (isParam(model)) {
+    if (router$utils$$.isParam(model)) {
       object[names[0]] = model;
       return object;
     }
@@ -56,3 +51,5 @@ var UnresolvedHandlerInfoByObject = subclass(HandlerInfo, {
 });
 
 exports["default"] = UnresolvedHandlerInfoByObject;
+
+//# sourceMappingURL=unresolved-handler-info-by-object.js.map

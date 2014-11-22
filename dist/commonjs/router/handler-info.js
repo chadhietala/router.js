@@ -1,14 +1,9 @@
 "use strict";
-var bind = require("./utils").bind;
-var merge = require("./utils").merge;
-var serialize = require("./utils").serialize;
-var promiseLabel = require("./utils").promiseLabel;
-var applyHook = require("./utils").applyHook;
-var Promise = require("rsvp/promise")["default"];
+var router$utils$$ = require("./utils"), router$config$$ = require("./config");
 
 function HandlerInfo(_props) {
   var props = _props || {};
-  merge(this, props);
+  router$utils$$.merge(this, props);
   this.initialize(props);
 }
 
@@ -30,7 +25,7 @@ HandlerInfo.prototype = {
   },
 
   promiseLabel: function(label) {
-    return promiseLabel("'" + this.name + "' " + label);
+    return router$utils$$.promiseLabel("'" + this.name + "' " + label);
   },
 
   getUnresolved: function() {
@@ -42,13 +37,13 @@ HandlerInfo.prototype = {
   },
 
   resolve: function(shouldContinue, payload) {
-    var checkForAbort  = bind(this, this.checkForAbort,      shouldContinue),
-        beforeModel    = bind(this, this.runBeforeModelHook, payload),
-        model          = bind(this, this.getModel,           payload),
-        afterModel     = bind(this, this.runAfterModelHook,  payload),
-        becomeResolved = bind(this, this.becomeResolved,     payload);
+    var checkForAbort  = router$utils$$.bind(this, this.checkForAbort,      shouldContinue),
+        beforeModel    = router$utils$$.bind(this, this.runBeforeModelHook, payload),
+        model          = router$utils$$.bind(this, this.getModel,           payload),
+        afterModel     = router$utils$$.bind(this, this.runAfterModelHook,  payload),
+        becomeResolved = router$utils$$.bind(this, this.becomeResolved,     payload);
 
-    return Promise.resolve(undefined, this.promiseLabel("Start handler"))
+    return router$config$$.default.Promise.resolve(undefined, this.promiseLabel("Start handler"))
            .then(checkForAbort, null, this.promiseLabel("Check for abort"))
            .then(beforeModel, null, this.promiseLabel("Before model"))
            .then(checkForAbort, null, this.promiseLabel("Check if aborted during 'beforeModel' hook"))
@@ -90,20 +85,20 @@ HandlerInfo.prototype = {
     }
     args.push(payload);
 
-    var result = applyHook(this.handler, hookName, args);
+    var result = router$utils$$.applyHook(this.handler, hookName, args);
 
     if (result && result.isTransition) {
       result = null;
     }
 
-    return Promise.resolve(result, this.promiseLabel("Resolve value returned from one of the model hooks"));
+    return router$config$$.default.Promise.resolve(result, this.promiseLabel("Resolve value returned from one of the model hooks"));
   },
 
   // overridden by subclasses
   getModel: null,
 
   checkForAbort: function(shouldContinue, promiseValue) {
-    return Promise.resolve(shouldContinue(), this.promiseLabel("Check for abort")).then(function() {
+    return router$config$$.default.Promise.resolve(shouldContinue(), this.promiseLabel("Check for abort")).then(function() {
       // We don't care about shouldContinue's resolve value;
       // pass along the original value passed to this fn.
       return promiseValue;
@@ -171,3 +166,5 @@ function paramsMatch(a, b) {
 }
 
 exports["default"] = HandlerInfo;
+
+//# sourceMappingURL=handler-info.js.map

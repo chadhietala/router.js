@@ -1,28 +1,10 @@
 "use strict";
-var RouteRecognizer = require("route-recognizer")["default"];
-var Promise = require("rsvp/promise")["default"];
-var trigger = require("./utils").trigger;
-var log = require("./utils").log;
-var slice = require("./utils").slice;
-var forEach = require("./utils").forEach;
-var merge = require("./utils").merge;
-var serialize = require("./utils").serialize;
-var extractQueryParams = require("./utils").extractQueryParams;
-var getChangelist = require("./utils").getChangelist;
-var promiseLabel = require("./utils").promiseLabel;
-var callHook = require("./utils").callHook;
-var TransitionState = require("./transition-state")["default"];
-var logAbort = require("./transition").logAbort;
-var Transition = require("./transition").Transition;
-var TransitionAborted = require("./transition").TransitionAborted;
-var NamedTransitionIntent = require("./transition-intent/named-transition-intent")["default"];
-var URLTransitionIntent = require("./transition-intent/url-transition-intent")["default"];
-var ResolvedHandlerInfo = require("./handler-info").ResolvedHandlerInfo;
+var router$config$$ = require("./config"), router$utils$$ = require("./utils"), router$transition$state$$ = require("./transition-state"), router$transition$$ = require("./transition"), router$transition$intent$named$transition$intent$$ = require("./transition-intent/named-transition-intent"), router$transition$intent$url$transition$intent$$ = require("./transition-intent/url-transition-intent"), router$handler$info$$ = require("./handler-info");
 
 var pop = Array.prototype.pop;
 
 function Router() {
-  this.recognizer = new RouteRecognizer();
+  this.recognizer = new router$config$$.default.RouteRecognizer();
   this.reset();
 }
 
@@ -32,7 +14,7 @@ function getTransitionByIntent(intent, isIntermediate) {
   var newTransition;
 
   var newState = intent.applyToState(oldState, this.recognizer, this.getHandler, isIntermediate);
-  var queryParamChangelist = getChangelist(oldState.queryParams, newState.queryParams);
+  var queryParamChangelist = router$utils$$.getChangelist(oldState.queryParams, newState.queryParams);
 
   if (handlerInfosEqual(newState.handlerInfos, oldState.handlerInfos)) {
 
@@ -45,7 +27,7 @@ function getTransitionByIntent(intent, isIntermediate) {
     }
 
     // No-op. No need to create a new transition.
-    return new Transition(this);
+    return new router$transition$$.Transition(this);
   }
 
   if (isIntermediate) {
@@ -54,7 +36,7 @@ function getTransitionByIntent(intent, isIntermediate) {
   }
 
   // Create a new transition to the destination route.
-  newTransition = new Transition(this, intent, newState);
+  newTransition = new router$transition$$.Transition(this, intent, newState);
 
   // Abort and usurp any previously active transition.
   if (this.activeTransition) {
@@ -67,7 +49,7 @@ function getTransitionByIntent(intent, isIntermediate) {
   // after the transition has been finalized.
   newTransition.promise = newTransition.promise.then(function(result) {
     return finalizeTransition(newTransition, result.state);
-  }, null, promiseLabel("Settle transition promise when transition is finalized"));
+  }, null, router$utils$$.promiseLabel("Settle transition promise when transition is finalized"));
 
   if (!wasTransitioning) {
     notifyExistingHandlers(this, newState, newTransition);
@@ -122,7 +104,7 @@ Router.prototype = {
       // perform a URL update at the end. This gives
       // the user the ability to set the url update
       // method (default is replaceState).
-      var newTransition = new Transition(this);
+      var newTransition = new router$transition$$.Transition(this);
       newTransition.queryParamsOnly = true;
 
       oldState.queryParams = finalizeQueryParamChange(this, newState.handlerInfos, newState.queryParams, newTransition);
@@ -133,7 +115,7 @@ Router.prototype = {
           router.didTransition(router.currentHandlerInfos);
         }
         return result;
-      }, null, promiseLabel("Transition complete"));
+      }, null, router$utils$$.promiseLabel("Transition complete"));
       return newTransition;
     }
   },
@@ -145,7 +127,7 @@ Router.prototype = {
     try {
       return getTransitionByIntent.apply(this, arguments);
     } catch(e) {
-      return new Transition(this, intent, null, e);
+      return new router$transition$$.Transition(this, intent, null, e);
     }
   },
 
@@ -156,13 +138,13 @@ Router.prototype = {
   */
   reset: function() {
     if (this.state) {
-      forEach(this.state.handlerInfos.slice().reverse(), function(handlerInfo) {
+      router$utils$$.forEach(this.state.handlerInfos.slice().reverse(), function(handlerInfo) {
         var handler = handlerInfo.handler;
-        callHook(handler, 'exit');
+        router$utils$$.callHook(handler, 'exit');
       });
     }
 
-    this.state = new TransitionState();
+    this.state = new router$transition$state$$.default();
     this.currentHandlerInfos = null;
   },
 
@@ -183,7 +165,7 @@ Router.prototype = {
   handleURL: function(url) {
     // Perform a URL-based transition, but don't change
     // the URL afterward, since it already happened.
-    var args = slice.call(arguments);
+    var args = router$utils$$.slice.call(arguments);
     if (url.charAt(0) !== '/') { args[0] = '/' + url; }
 
     return doTransition(this, args).method(null);
@@ -234,8 +216,8 @@ Router.prototype = {
       params[handlerInfo.name] = handlerInfo.params || {};
     }
 
-    log(this, "Starting a refresh transition");
-    var intent = new NamedTransitionIntent({
+    router$utils$$.log(this, "Starting a refresh transition");
+    var intent = new router$transition$intent$named$transition$intent$$.default({
       name: handlerInfos[handlerInfos.length - 1].name,
       pivotHandler: pivotHandler || handlerInfos[0].handler,
       contexts: [], // TODO collect contexts...?
@@ -269,20 +251,20 @@ Router.prototype = {
   */
   generate: function(handlerName) {
 
-    var partitionedArgs = extractQueryParams(slice.call(arguments, 1)),
+    var partitionedArgs = router$utils$$.extractQueryParams(router$utils$$.slice.call(arguments, 1)),
       suppliedParams = partitionedArgs[0],
       queryParams = partitionedArgs[1];
 
     // Construct a TransitionIntent with the provided params
     // and apply it to the present state of the router.
-    var intent = new NamedTransitionIntent({ name: handlerName, contexts: suppliedParams });
+    var intent = new router$transition$intent$named$transition$intent$$.default({ name: handlerName, contexts: suppliedParams });
     var state = intent.applyToState(this.state, this.recognizer, this.getHandler);
     var params = {};
 
     for (var i = 0, len = state.handlerInfos.length; i < len; ++i) {
       var handlerInfo = state.handlerInfos[i];
       var handlerParams = handlerInfo.serialize();
-      merge(params, handlerParams);
+      router$utils$$.merge(params, handlerParams);
     }
     params.queryParams = queryParams;
 
@@ -290,7 +272,7 @@ Router.prototype = {
   },
 
   applyIntent: function(handlerName, contexts) {
-    var intent = new NamedTransitionIntent({
+    var intent = new router$transition$intent$named$transition$intent$$.default({
       name: handlerName,
       contexts: contexts
     });
@@ -319,11 +301,11 @@ Router.prototype = {
       return false;
     }
 
-    var state = new TransitionState();
+    var state = new router$transition$state$$.default();
     state.handlerInfos = targetHandlerInfos.slice(0, index + 1);
     recogHandlers = recogHandlers.slice(0, index + 1);
 
-    var intent = new NamedTransitionIntent({
+    var intent = new router$transition$intent$named$transition$intent$$.default({
       name: targetHandler,
       contexts: contexts
     });
@@ -337,7 +319,7 @@ Router.prototype = {
 
     // Get a hash of QPs that will still be active on new route
     var activeQPsOnNewHandler = {};
-    merge(activeQPsOnNewHandler, queryParams);
+    router$utils$$.merge(activeQPsOnNewHandler, queryParams);
 
     var activeQueryParams  = this.state.queryParams;
     for (var key in activeQueryParams) {
@@ -347,17 +329,17 @@ Router.prototype = {
       }
     }
 
-    return handlersEqual && !getChangelist(activeQPsOnNewHandler, queryParams);
+    return handlersEqual && !router$utils$$.getChangelist(activeQPsOnNewHandler, queryParams);
   },
 
   isActive: function(handlerName) {
-    var partitionedArgs = extractQueryParams(slice.call(arguments, 1));
+    var partitionedArgs = router$utils$$.extractQueryParams(router$utils$$.slice.call(arguments, 1));
     return this.isActiveIntent(handlerName, partitionedArgs[0], partitionedArgs[1]);
   },
 
   trigger: function(name) {
-    var args = slice.call(arguments);
-    trigger(this, this.currentHandlerInfos, false, args);
+    var args = router$utils$$.slice.call(arguments);
+    router$utils$$.trigger(this, this.currentHandlerInfos, false, args);
   },
 
   /**
@@ -369,11 +351,11 @@ Router.prototype = {
 
   _willChangeContextEvent: 'willChangeContext',
   _triggerWillChangeContext: function(handlerInfos, newTransition) {
-    trigger(this, handlerInfos, true, [this._willChangeContextEvent, newTransition]);
+    router$utils$$.trigger(this, handlerInfos, true, [this._willChangeContextEvent, newTransition]);
   },
 
   _triggerWillLeave: function(handlerInfos, newTransition, leavingChecker) {
-    trigger(this, handlerInfos, true, ['willLeave', newTransition, leavingChecker]);
+    router$utils$$.trigger(this, handlerInfos, true, ['willLeave', newTransition, leavingChecker]);
   }
 };
 
@@ -390,7 +372,7 @@ function fireQueryParamDidChange(router, newState, queryParamChangelist) {
     // changed query params given that no activeTransition
     // is guaranteed to have occurred.
     router._changedQueryParams = queryParamChangelist.all;
-    trigger(router, newState.handlerInfos, true, ['queryParamsDidChange', queryParamChangelist.changed, queryParamChangelist.all, queryParamChangelist.removed]);
+    router$utils$$.trigger(router, newState.handlerInfos, true, ['queryParamsDidChange', queryParamChangelist.changed, queryParamChangelist.all, queryParamChangelist.removed]);
     router._changedQueryParams = null;
   }
 }
@@ -439,12 +421,12 @@ function fireQueryParamDidChange(router, newState, queryParamChangelist) {
 function setupContexts(router, newState, transition) {
   var partition = partitionHandlers(router.state, newState);
 
-  forEach(partition.exited, function(handlerInfo) {
+  router$utils$$.forEach(partition.exited, function(handlerInfo) {
     var handler = handlerInfo.handler;
     delete handler.context;
 
-    callHook(handler, 'reset', true, transition);
-    callHook(handler, 'exit', transition);
+    router$utils$$.callHook(handler, 'reset', true, transition);
+    router$utils$$.callHook(handler, 'exit', transition);
   });
 
   var oldState = router.oldState = router.state;
@@ -452,16 +434,16 @@ function setupContexts(router, newState, transition) {
   var currentHandlerInfos = router.currentHandlerInfos = partition.unchanged.slice();
 
   try {
-    forEach(partition.reset, function(handlerInfo) {
+    router$utils$$.forEach(partition.reset, function(handlerInfo) {
       var handler = handlerInfo.handler;
-      callHook(handler, 'reset', false, transition);
+      router$utils$$.callHook(handler, 'reset', false, transition);
     });
 
-    forEach(partition.updatedContext, function(handlerInfo) {
+    router$utils$$.forEach(partition.updatedContext, function(handlerInfo) {
       return handlerEnteredOrUpdated(currentHandlerInfos, handlerInfo, false, transition);
     });
 
-    forEach(partition.entered, function(handlerInfo) {
+    router$utils$$.forEach(partition.entered, function(handlerInfo) {
       return handlerEnteredOrUpdated(currentHandlerInfos, handlerInfo, true, transition);
     });
   } catch(e) {
@@ -486,18 +468,18 @@ function handlerEnteredOrUpdated(currentHandlerInfos, handlerInfo, enter, transi
       context = handlerInfo.context;
 
   if (enter) {
-    callHook(handler, 'enter', transition);
+    router$utils$$.callHook(handler, 'enter', transition);
   }
   if (transition && transition.isAborted) {
-    throw new TransitionAborted();
+    throw new router$transition$$.TransitionAborted();
   }
 
   handler.context = context;
-  callHook(handler, 'contextDidChange');
+  router$utils$$.callHook(handler, 'contextDidChange');
 
-  callHook(handler, 'setup', context, transition);
+  router$utils$$.callHook(handler, 'setup', context, transition);
   if (transition && transition.isAborted) {
-    throw new TransitionAborted();
+    throw new router$transition$$.TransitionAborted();
   }
 
   currentHandlerInfos.push(handlerInfo);
@@ -602,7 +584,7 @@ function updateURL(transition, state, inputUrl) {
 
   for (var i = handlerInfos.length - 1; i >= 0; --i) {
     var handlerInfo = handlerInfos[i];
-    merge(params, handlerInfo.params);
+    router$utils$$.merge(params, handlerInfo.params);
     if (handlerInfo.handler.inaccessibleByURL) {
       urlMethod = null;
     }
@@ -629,7 +611,7 @@ function updateURL(transition, state, inputUrl) {
 function finalizeTransition(transition, newState) {
 
   try {
-    log(transition.router, transition.sequence, "Resolved all models on destination route; finalizing transition.");
+    router$utils$$.log(transition.router, transition.sequence, "Resolved all models on destination route; finalizing transition.");
 
     var router = transition.router,
         handlerInfos = newState.handlerInfos,
@@ -642,7 +624,7 @@ function finalizeTransition(transition, newState) {
     if (transition.isAborted) {
       // TODO: cleaner way? distinguish b/w targetHandlerInfos?
       router.state.handlerInfos = router.currentHandlerInfos;
-      return Promise.reject(logAbort(transition));
+      return router$config$$.default.Promise.reject(router$transition$$.logAbort(transition));
     }
 
     updateURL(transition, newState, transition.intent.url);
@@ -650,18 +632,18 @@ function finalizeTransition(transition, newState) {
     transition.isActive = false;
     router.activeTransition = null;
 
-    trigger(router, router.currentHandlerInfos, true, ['didTransition']);
+    router$utils$$.trigger(router, router.currentHandlerInfos, true, ['didTransition']);
 
     if (router.didTransition) {
       router.didTransition(router.currentHandlerInfos);
     }
 
-    log(router, transition.sequence, "TRANSITION COMPLETE.");
+    router$utils$$.log(router, transition.sequence, "TRANSITION COMPLETE.");
 
     // Resolve with the final handler.
     return handlerInfos[handlerInfos.length - 1].handler;
   } catch(e) {
-    if (!((e instanceof TransitionAborted))) {
+    if (!(e instanceof router$transition$$.TransitionAborted)) {
       //var erroneousHandler = handlerInfos.pop();
       var infos = transition.state.handlerInfos;
       transition.trigger(true, 'error', e, transition, infos[infos.length-1].handler);
@@ -696,12 +678,12 @@ function doTransition(router, args, isIntermediate) {
   var intent;
   if (args.length === 0) {
 
-    log(router, "Updating query params");
+    router$utils$$.log(router, "Updating query params");
 
     // A query param update is really just a transition
     // into the route you're already on.
     var handlerInfos = router.state.handlerInfos;
-    intent = new NamedTransitionIntent({
+    intent = new router$transition$intent$named$transition$intent$$.default({
       name: handlerInfos[handlerInfos.length - 1].name,
       contexts: [],
       queryParams: queryParams
@@ -709,15 +691,15 @@ function doTransition(router, args, isIntermediate) {
 
   } else if (name.charAt(0) === '/') {
 
-    log(router, "Attempting URL transition to " + name);
-    intent = new URLTransitionIntent({ url: name });
+    router$utils$$.log(router, "Attempting URL transition to " + name);
+    intent = new router$transition$intent$url$transition$intent$$.default({ url: name });
 
   } else {
 
-    log(router, "Attempting transition to " + name);
-    intent = new NamedTransitionIntent({
+    router$utils$$.log(router, "Attempting transition to " + name);
+    intent = new router$transition$intent$named$transition$intent$$.default({
       name: args[0],
-      contexts: slice.call(args, 1),
+      contexts: router$utils$$.slice.call(args, 1),
       queryParams: queryParams
     });
   }
@@ -755,7 +737,7 @@ function finalizeQueryParamChange(router, resolvedHandlers, newQueryParams, tran
   }
 
   var finalQueryParamsArray = [];
-  trigger(router, resolvedHandlers, true, ['finalizeQueryParamChange', newQueryParams, finalQueryParamsArray, transition]);
+  router$utils$$.trigger(router, resolvedHandlers, true, ['finalizeQueryParamChange', newQueryParams, finalQueryParamsArray, transition]);
 
   if (transition) {
     transition._visibleQueryParams = {};
@@ -811,7 +793,9 @@ function notifyExistingHandlers(router, newState, newTransition) {
     router._triggerWillChangeContext(changing, newTransition);
   }
 
-  trigger(router, oldHandlers, true, ['willTransition', newTransition]);
+  router$utils$$.trigger(router, oldHandlers, true, ['willTransition', newTransition]);
 }
 
 exports["default"] = Router;
+
+//# sourceMappingURL=router.js.map
