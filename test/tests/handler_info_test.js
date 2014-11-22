@@ -1,4 +1,4 @@
-import { module, stubbedHandlerInfoFactory } from "tests/test_helpers";
+import { module, stubbedHandlerInfoFactory } from "./test_helpers";
 import Router from "router";
 
 import HandlerInfo from 'router/handler-info';
