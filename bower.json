@@ -15,10 +15,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "backburner": "ebryn/backburner.js#87b6ebf394616820c375e3779209bb3db3ac4ee6",
     "route-recognizer": "tildeio/route-recognizer#65b5856a5702607ea00a8550e75891b3a35a3307"
   },
   "devDependencies": {
+    "backburner": "ebryn/backburner.js#87b6ebf394616820c375e3779209bb3db3ac4ee6",
     "qunit": "~1.15.0"
   }
 }
